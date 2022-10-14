@@ -2,13 +2,14 @@
 SELECT
     interviews.student as "student",
     appointments.time as "time",
-    interviewers.name as "interviewer"
+    interviewers.name as "interviewer",
+    appointments.id as "appointmentid"
 FROM
     appointments
     INNER JOIN interviews ON interviews.appointment_id = appointments.id
     INNER JOIN interviewers ON interviews.interviewer_id = interviewers.id
 WHERE
-    appointments.day_id = 2
+    appointments.day_id = 1
 ORDER BY
     appointments.time;
 
