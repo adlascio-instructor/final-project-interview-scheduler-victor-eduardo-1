@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 
 import "./App.scss";
 
@@ -9,8 +9,15 @@ import appointmentsData from "./components/__mocks__/appointments.json";
 
 export default function Application() {
   const [day, setDay] = useState("Monday");
-  const [days, setDays] = useState(daysData);
+  const [days, setDays] = useState("");
   const [appointments, setAppointments] = useState(appointmentsData);
+
+
+  useEffect(() => {
+    getDays();
+  }, []);
+
+
   function bookInterview(id, interview) {
     console.log(id, interview);
     const isEdit = appointments[id].interview;
@@ -39,6 +46,19 @@ export default function Application() {
       });
     }
   }
+
+  function getDays() {
+    console.log("QUE WEA ");
+    fetch("http://localhost:3001/getDays")
+      .then((response) => {
+        return response.text();
+      })
+      .then((data) => {
+        setDays(data);
+      });
+  }
+
+
   function cancelInterview(id) {
     setAppointments((prev) => {
       const updatedAppointment = {

@@ -1,0 +1,17 @@
+Get /schedule/:day
+This route obtain all the scheduled appointment for that day. 
+This route obtain all the schedule and interviewer available. 
+
+Post /schedule/:appointment_id
+This route update to selected interview. 
+
+Post /schedule/delete/:appointment_id
+This route delete to selected interview. 
+
+GET /schedule/available/interviewer
+This route obtain all the interviewer available for that day. 
+
+GET /appointment/available
+This route obtain should the quantity of appointment you can schedule.
+
+
