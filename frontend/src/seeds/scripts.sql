@@ -3,7 +3,9 @@ SELECT
     interviews.student as "student",
     appointments.time as "time",
     interviewers.name as "interviewer",
-    appointments.id as "appointmentid"
+    appointments.id as "appointmentid",
+    interviewers.name as "name",
+    interviewers.avatar as "avatar"
 FROM
     appointments
     INNER JOIN interviews ON interviews.appointment_id = appointments.id
