@@ -4,18 +4,21 @@ import "./App.scss";
 
 import DayList from "./components/DayList";
 import Appointment from "./components/Appointment";
-import daysData from "./components/__mocks__/days.json";
-import appointmentsData from "./components/__mocks__/appointments.json";
+
 
 export default function Application() {
-  const [day, setDay] = useState("Monday");
+  const [day, setDay] = useState("");
   const [days, setDays] = useState("");
   const [appointments, setAppointments] = useState("");
   const totalAppointmentsPerDay = 5;
 
+  //getAppointments(day)
+
   useEffect(() => {
+
     getDays();
-    getAppointments();
+    getDay();
+    getAppointments(day);
   }, []);
 
   function bookInterview(id, interview) {
@@ -47,6 +50,11 @@ export default function Application() {
     }
   }
 
+  function getDay() {
+    console.log("DENTRO DEL GETDAY");
+    setDay("Monday");
+  }
+
   function getDays() {
     fetch("http://localhost:8000/getDaysAndAppointmentsAvailables", {
       method: "GET",
@@ -71,9 +79,33 @@ export default function Application() {
       });
   }
 
-  function getAppointments() {
-    console.log(" IN getAppointments APPS ");
-    fetch("http://localhost:8000/getAppointmentsByDay/:1", {
+  function getAppointments(day) {
+    console.log(" IN getAppointments APPS " + day);
+
+    let dayTransform = 0;
+
+    switch (day) {
+      case "Monday":
+        dayTransform = 1;
+        break;
+      case "Tuesday":
+        dayTransform = 2;
+        break;
+      case "Wednesday":
+        dayTransform = 3;
+        break;
+      case "Thursday":
+        dayTransform = 4;
+        break;
+      case "Friday":
+        dayTransform = 5;
+        break;
+      default:
+        dayTransform=1;
+    }
+    console.log("LOG DAY TRANS"+dayTransform);
+
+    fetch("http://localhost:8000/getAppointmentsByDay/:"+dayTransform, {
       method: "GET",
       headers: {
         "Content-Type": "text/plain",
@@ -85,19 +117,6 @@ export default function Application() {
       .then((data) => {
         console.log("DAATAAA appointments " + JSON.stringify(data));
         let parseData = [];
-
-        // "2": {
-        //   "id": 2,
-        //   "time": "1pm",
-        //   "interview": {
-        //     "student": "Lydia Miller-Jones",
-        //     "interviewer": {
-        //       "id": 3,
-        //       "name": "Sylvia Palmer",
-        //       "avatar": "https://i.imgur.com/LpaY82x.png"
-        //     }
-        //   }
-        // },
 
         for (var i in data) {
           let interviewer = {
@@ -118,6 +137,30 @@ export default function Application() {
 
           parseData.push(dataAppointment);
         }
+
+        let iterator = 0;
+
+        while (iterator < 6) {
+          let calc = iterator + 12;
+          let timeToCheck = calc.toString();
+          timeToCheck = timeToCheck + "pm";
+          const result = parseData.find(({ time }) => time === timeToCheck);
+
+          if (!result) {
+            let dataAppointment = {
+              id: iterator * 2,
+              time: timeToCheck,
+            };
+            parseData.push(dataAppointment);
+          }
+
+          iterator++;
+        }
+        parseData.sort(
+          (firstItem, secondItem) =>
+            firstItem.time.substring(0, 2) - secondItem.time.substring(0, 2)
+        );
+
         setAppointments(parseData);
       });
   }
@@ -170,7 +213,7 @@ export default function Application() {
             cancelInterview={cancelInterview}
           />
         ))}
-        <Appointment key="last" time="5pm" />
+        {/* <Appointment key="last" time="54pm" /> */}
       </section>
     </main>
   );
