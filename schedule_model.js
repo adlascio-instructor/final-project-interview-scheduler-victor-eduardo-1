@@ -39,7 +39,40 @@ const getDays =() =>
 
 }
 
+
+const getAppointments =(day_id) => 
+{
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      `SELECT
+      appointments.time as "time",
+      interviews.student as "student",
+      interviewers.name as "interviewer",
+      interviewers.id as "interviewerid",
+      interviewers.avatar as "avatar",
+      appointments.id as "appointmentid"
+  FROM
+      appointments
+      INNER JOIN interviews ON interviews.appointment_id = appointments.id
+      INNER JOIN interviewers ON interviews.interviewer_id = interviewers.id
+  WHERE
+      appointments.day_id = ${day_id}
+  ORDER BY
+      appointments.time`,
+      (error, results) => {
+        if (error) {
+          reject(error);
+        }
+        resolve(results.rows);
+      }
+    );
+  });
+
+
+}
+
 module.exports = {
   getDaysAndAppointmentsAvailables,
   getDays,
+  getAppointments,
 };

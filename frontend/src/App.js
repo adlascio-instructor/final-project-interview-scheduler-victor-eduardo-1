@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import "./App.scss";
 
@@ -10,13 +10,13 @@ import appointmentsData from "./components/__mocks__/appointments.json";
 export default function Application() {
   const [day, setDay] = useState("Monday");
   const [days, setDays] = useState("");
-  const [appointments, setAppointments] = useState(appointmentsData);
-
+  const [appointments, setAppointments] = useState("");
+  const totalAppointmentsPerDay = 5;
 
   useEffect(() => {
     getDays();
+    getAppointments();
   }, []);
-
 
   function bookInterview(id, interview) {
     console.log(id, interview);
@@ -48,16 +48,79 @@ export default function Application() {
   }
 
   function getDays() {
-    console.log("QUE WEA ");
-    fetch("http://localhost:3001/getDays")
+    fetch("http://localhost:8000/getDaysAndAppointmentsAvailables", {
+      method: "GET",
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    })
       .then((response) => {
-        return response.text();
+        return response.json();
       })
       .then((data) => {
-        setDays(data);
+        let parseData = [];
+        for (var i in data) {
+          let day = {
+            name: data[i].name,
+            id: i,
+            spots: totalAppointmentsPerDay - data[i].count,
+          };
+          parseData.push(day);
+        }
+        setDays(parseData);
       });
   }
 
+  function getAppointments() {
+    console.log(" IN getAppointments APPS ");
+    fetch("http://localhost:8000/getAppointmentsByDay/:1", {
+      method: "GET",
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log("DAATAAA appointments " + JSON.stringify(data));
+        let parseData = [];
+
+        // "2": {
+        //   "id": 2,
+        //   "time": "1pm",
+        //   "interview": {
+        //     "student": "Lydia Miller-Jones",
+        //     "interviewer": {
+        //       "id": 3,
+        //       "name": "Sylvia Palmer",
+        //       "avatar": "https://i.imgur.com/LpaY82x.png"
+        //     }
+        //   }
+        // },
+
+        for (var i in data) {
+          let interviewer = {
+            id: data[i].interviewerid,
+            avatar: data[i].avatar,
+            name: data[i].name,
+          };
+          let interview = {
+            student: data[i].student,
+            interviewer: interviewer,
+          };
+
+          let dataAppointment = {
+            id: data[i].appointmentid,
+            time: data[i].time,
+            interview: interview,
+          };
+
+          parseData.push(dataAppointment);
+        }
+        setAppointments(parseData);
+      });
+  }
 
   function cancelInterview(id) {
     setAppointments((prev) => {
