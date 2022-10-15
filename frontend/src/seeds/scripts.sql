@@ -1,11 +1,11 @@
 /* - Get all interviews for a given day*/
 SELECT
-    interviews.student as "student",
     appointments.time as "time",
+    interviews.student as "student",
     interviewers.name as "interviewer",
-    appointments.id as "appointmentid",
-    interviewers.name as "name",
-    interviewers.avatar as "avatar"
+    interviewers.id as "interviewerid",
+    interviewers.avatar as "avatar",
+    appointments.id as "appointmentid"
 FROM
     appointments
     INNER JOIN interviews ON interviews.appointment_id = appointments.id
