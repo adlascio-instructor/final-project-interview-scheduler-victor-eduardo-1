@@ -122,7 +122,7 @@ export default function Application() {
           let interviewer = {
             id: data[i].interviewerid,
             avatar: data[i].avatar,
-            name: data[i].name,
+            name: data[i].interviewer,
           };
           let interview = {
             student: data[i].student,
@@ -162,6 +162,7 @@ export default function Application() {
         );
 
         setAppointments(parseData);
+        console.log("PROPPPSS"+JSON.stringify(appointments))
       });
   }
 
