@@ -39,6 +39,21 @@ const getDays =() =>
 
 }
 
+const getInterviewers =() => 
+{
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      'SELECT * FROM interviewers',
+      (error, results) => {
+        if (error) {
+          reject(error);
+        }
+        resolve(results.rows);
+      }
+    );
+  });
+
+}
 
 const getAppointments =(day_id) => 
 {
@@ -75,4 +90,5 @@ module.exports = {
   getDaysAndAppointmentsAvailables,
   getDays,
   getAppointments,
+  getInterviewers,
 };

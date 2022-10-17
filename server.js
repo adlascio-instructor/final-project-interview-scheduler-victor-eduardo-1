@@ -44,4 +44,20 @@ app.get("/getAppointmentsByDay/:id", (req, res) => {
     });
 });
 
+
+app.get("/getInterviewers", (req, res) => {
+  // res.status(200).send('Hello World!');
+
+  scheduler_model
+    .getInterviewers()
+    .then((response) => {
+      
+      res.status(200).send(response);
+    })
+    .catch((error) => {
+      res.status(500).send(error);
+    });
+});
+
+
 app.listen(port, () => console.log(`Server is running on port ${port}`));

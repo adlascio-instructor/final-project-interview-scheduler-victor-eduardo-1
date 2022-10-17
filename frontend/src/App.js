@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-
+import axios from "axios";
 import "./App.scss";
 
 import DayList from "./components/DayList";
 import Appointment from "./components/Appointment";
 
-
 export default function Application() {
-  const [day, setDay] = useState("");
+  const [day, setDay] = useState(1);
   const [days, setDays] = useState("");
   const [appointments, setAppointments] = useState("");
   const totalAppointmentsPerDay = 5;
@@ -15,14 +14,91 @@ export default function Application() {
   //getAppointments(day)
 
   useEffect(() => {
-
     getDays();
     getDay();
-    getAppointments(day);
   }, []);
 
+  useEffect(() => {
+    let dayTransform = 0;
+
+    switch (day) {
+      case "Monday":
+        dayTransform = 1;
+        break;
+      case "Tuesday":
+        dayTransform = 2;
+        break;
+      case "Wednesday":
+        dayTransform = 3;
+        break;
+      case "Thursday":
+        dayTransform = 4;
+        break;
+      case "Friday":
+        dayTransform = 5;
+        break;
+      default:
+        dayTransform = 1;
+    }
+    axios
+      .get(`http://localhost:8000/getAppointmentsByDay/:${dayTransform}`)
+      .then((res) => {
+        console.log("RES DATAA appointr" + JSON.stringify(res.data));
+
+        let data = res.data;
+
+        let parseData = [];
+
+        for (var i in data) {
+          let interviewer = {
+            id: data[i].interviewerid,
+            avatar: data[i].avatar,
+            name: data[i].interviewer,
+          };
+          let interview = {
+            student: data[i].student,
+            interviewer: interviewer,
+          };
+
+          let dataAppointment = {
+            id: data[i].appointmentid,
+            time: data[i].time,
+            interview: interview,
+          };
+
+          parseData.push(dataAppointment);
+        }
+
+        let iterator = 0;
+
+        while (iterator < 6) {
+          let calc = iterator + 12;
+          let timeToCheck = calc.toString();
+          timeToCheck = timeToCheck + "pm";
+          const result = parseData.find(({ time }) => time === timeToCheck);
+
+          if (!result) {
+            let dataAppointment = {
+              id: iterator * 2,
+              time: timeToCheck,
+            };
+            parseData.push(dataAppointment);
+          }
+
+          iterator++;
+        }
+        parseData.sort(
+          (firstItem, secondItem) =>
+            firstItem.time.substring(0, 2) - secondItem.time.substring(0, 2)
+        );
+
+        setAppointments(parseData);
+      });
+  }, [day]);
+
   function bookInterview(id, interview) {
-    console.log(id, interview);
+    console.log("bookInterview ID " + id);
+    console.log("bookInterview" + JSON.stringify(appointments[id]));
     const isEdit = appointments[id].interview;
     setAppointments((prev) => {
       const appointment = {
@@ -79,92 +155,6 @@ export default function Application() {
       });
   }
 
-  function getAppointments(day) {
-    console.log(" IN getAppointments APPS " + day);
-
-    let dayTransform = 0;
-
-    switch (day) {
-      case "Monday":
-        dayTransform = 1;
-        break;
-      case "Tuesday":
-        dayTransform = 2;
-        break;
-      case "Wednesday":
-        dayTransform = 3;
-        break;
-      case "Thursday":
-        dayTransform = 4;
-        break;
-      case "Friday":
-        dayTransform = 5;
-        break;
-      default:
-        dayTransform=1;
-    }
-    console.log("LOG DAY TRANS"+dayTransform);
-
-    fetch("http://localhost:8000/getAppointmentsByDay/:"+dayTransform, {
-      method: "GET",
-      headers: {
-        "Content-Type": "text/plain",
-      },
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        console.log("DAATAAA appointments " + JSON.stringify(data));
-        let parseData = [];
-
-        for (var i in data) {
-          let interviewer = {
-            id: data[i].interviewerid,
-            avatar: data[i].avatar,
-            name: data[i].interviewer,
-          };
-          let interview = {
-            student: data[i].student,
-            interviewer: interviewer,
-          };
-
-          let dataAppointment = {
-            id: data[i].appointmentid,
-            time: data[i].time,
-            interview: interview,
-          };
-
-          parseData.push(dataAppointment);
-        }
-
-        let iterator = 0;
-
-        while (iterator < 6) {
-          let calc = iterator + 12;
-          let timeToCheck = calc.toString();
-          timeToCheck = timeToCheck + "pm";
-          const result = parseData.find(({ time }) => time === timeToCheck);
-
-          if (!result) {
-            let dataAppointment = {
-              id: iterator * 2,
-              time: timeToCheck,
-            };
-            parseData.push(dataAppointment);
-          }
-
-          iterator++;
-        }
-        parseData.sort(
-          (firstItem, secondItem) =>
-            firstItem.time.substring(0, 2) - secondItem.time.substring(0, 2)
-        );
-
-        setAppointments(parseData);
-        console.log("PROPPPSS"+JSON.stringify(appointments))
-      });
-  }
 
   function cancelInterview(id) {
     setAppointments((prev) => {
@@ -206,10 +196,11 @@ export default function Application() {
       <section className="schedule">
         {Object.values(appointments).map((appointment) => (
           <Appointment
-            key={appointment.id}
+            key={appointment.appointmentid}
             {...appointment}
             bookInterview={(interview) =>
-              bookInterview(appointment.id, interview)
+             
+              bookInterview(appointment.appointmentid, interview)
             }
             cancelInterview={cancelInterview}
           />
